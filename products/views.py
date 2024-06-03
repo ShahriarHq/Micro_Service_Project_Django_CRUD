@@ -1,3 +1,4 @@
+from django.db.migrations import serializer
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -41,7 +42,7 @@ class ProductViewSet(viewsets.ViewSet):
         product = Product.objects.get(id=pk)
         product.delete()
         publish('Product_deleted',pk)
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_204_NO_CONTENT, data="Product Key "+pk+" Deleted")
 
 class UserAPIView(APIView):
         def get(self, _):
