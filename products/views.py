@@ -1,8 +1,10 @@
+from django.db.migrations import serializer
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from products.models import Product, User
+from products.producer import publish
 from products.serializers import ProductSerializer
 import random
 
@@ -19,6 +21,7 @@ class ProductViewSet(viewsets.ViewSet):
         serializer = ProductSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        publish('Product_created',serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     # API delete function
@@ -32,12 +35,14 @@ class ProductViewSet(viewsets.ViewSet):
         serializer = ProductSerializer(instance=products, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        publish('Product_updated',serializer.data)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def destroy(self, request, pk= None): # /api/products/<str:id>
         product = Product.objects.get(id=pk)
         product.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        publish('Product_deleted',pk)
+        return Response(status=status.HTTP_204_NO_CONTENT, data="Product Key "+pk+" Deleted")
 
 class UserAPIView(APIView):
         def get(self, _):
